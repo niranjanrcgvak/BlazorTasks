@@ -1,0 +1,82 @@
+﻿@page "/"
+
+<PageTitle>To-Do List</PageTitle>
+
+@using Task1.Models
+
+<div class="container">
+    <h3 class="mb-4">To-Do List</h3>
+    <div class="progress">
+        <div class="progress-bar" role="progressbar" style="width: @GetProgressPercentage()%" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100">@GetProgressPercentage()%</div>
+    </div>
+    <br />
+    <div class="input-group mb-3">
+        <input type="text" @bind="newToDoDescription" class="form-control" placeholder="Add new to-do item" />
+        <div class="input-group-append">
+            <button class="btn btn-primary" @onclick="AddItem">Add</button>
+        </div>
+    </div>
+
+    <ul class="list-group">
+        @foreach (var item in todoItems)
+        {
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                @if (item.IsEditing)
+                {
+                    <input @bind="item.Description" class="form-control" />
+                    <button class="btn btn-success ml-2" @onclick="() => SaveItem(item)"><i class="fa-solid fa-floppy-disk"></i></button>
+                }
+                else
+                {
+                    <div>
+                        <input type="checkbox" @bind="item.IsCompleted" />
+                        <span style="text-decoration: @(item.IsCompleted ? "line-through" : "none")">
+                            @item.Description
+                        </span>
+                    </div>
+                    <div>
+                        <button class="btn btn-sm btn-secondary ml-2" @onclick="() => EditItem(item)"><i class="fa-solid fa-pencil"></i></button>
+                        <button class="btn btn-sm btn-danger ml-2" @onclick="() => DeleteItem(item)"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                }
+            </li>
+        }
+    </ul>
+</div>
+
+@code {
+
+    private List<ToDoItem> todoItems = new List<ToDoItem>();
+    private string newToDoDescription = string.Empty;
+
+    private void AddItem()
+    {
+        if (!string.IsNullOrWhiteSpace(newToDoDescription))
+        {
+            todoItems.Add(new ToDoItem { Description = newToDoDescription, IsCompleted = false });
+            newToDoDescription = string.Empty;
+        }
+    }
+
+    private void DeleteItem(ToDoItem item)
+    {
+        todoItems.Remove(item);
+    }
+
+    private void EditItem(ToDoItem item)
+    {
+        item.IsEditing = true;
+    }
+
+    private void SaveItem(ToDoItem item)
+    {
+        item.IsEditing = false;
+    }
+
+    private int GetProgressPercentage()
+    {
+        if (todoItems.Count == 0) return 0;
+        var completed = todoItems.Count(item => item.IsCompleted);
+        return (completed * 100) / todoItems.Count;
+    }
+}
