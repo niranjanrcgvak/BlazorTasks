@@ -1,0 +1,47 @@
+﻿<!-- Pages/Register.razor -->
+@page "/register"
+@using System.ComponentModel.DataAnnotations
+@using Task2.Web.Models
+@using Task2.Web.Services
+@inject AuthService AuthService
+@inject NavigationManager NavigationManager
+@layout InitialLayout
+
+<div class="container d-flex justify-content-center align-items-center" style="height: 98vh !important;">
+    <div class="card shadow-sm" style="max-width: 350px; width: 100%;">
+        <div class="card-body">
+            <h3 class="card-title text-center mb-4">Register</h3>
+
+            <EditForm Model="registerModel" OnValidSubmit="HandleValidSubmit">
+                <DataAnnotationsValidator />
+                <ValidationSummary />            
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email:</label>
+                    <InputText id="email" @bind-Value="registerModel.Email" class="form-control" />
+                </div>
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password:</label>
+                    <InputText id="password" @bind-Value="registerModel.Password" type="password" class="form-control" />
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100">Register</button>
+            </EditForm>
+            <div class="text-center mt-3">
+                <a href="/login" class="text-decoration-none">Already have an account? Login</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@code {
+    private RegisterModel registerModel = new RegisterModel();
+    private async Task HandleValidSubmit()
+    {
+        RegisterResponse registerResponse = await AuthService.RegisterAsync(registerModel.Email, registerModel.Password);
+        if (registerResponse.IsSucceeded)
+        {
+            NavigationManager.NavigateTo("/login");
+        }
+    }
+}

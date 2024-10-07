@@ -1,0 +1,30 @@
+﻿@using Microsoft.AspNetCore.Components.Authorization
+@using Task2.Web.Services
+@inject AuthService AuthService
+@inject NavigationManager NavigationManager
+@inherits LayoutComponentBase
+<div class="page">
+    <div class="sidebar">
+        <NavMenu />
+    </div>
+
+    <main>
+        <div class="top-row px-4">
+        <AuthorizeView>
+        <Authorized Context="authContext">
+                    <span class="link-primary" role="button" @onclick="logout">Logout</span>
+        </Authorized>
+        </AuthorizeView>
+        </div>
+        <article class="content px-4">
+            @Body
+        </article>
+    </main>
+</div>
+@code{
+    private async Task logout()
+    {
+        await AuthService.LogoutAsync();
+        NavigationManager.NavigateTo("/login");
+    }
+}

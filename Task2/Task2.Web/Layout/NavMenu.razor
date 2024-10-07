@@ -1,0 +1,37 @@
+﻿@using Microsoft.AspNetCore.Components.Authorization
+﻿<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="">Task2</a>
+        <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+</div>
+
+<div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
+    <nav class="flex-column">
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="/todo" Match="NavLinkMatch.All">
+                <span class="fa-solid fa-list mr-1" aria-hidden="true"></span> &nbsp; To-Do List
+            </NavLink>
+            <AuthorizeView Roles="Admin">
+                <Authorized Context="authContext">
+                    <NavLink class="nav-link" href="/userlist" Match="NavLinkMatch.All">
+                        <span class="fa-solid fa-user mr-1" aria-hidden="true"></span> &nbsp; Users
+                    </NavLink>
+                </Authorized>
+            </AuthorizeView>
+        </div>
+    </nav>
+</div>
+
+@code {
+    private bool collapseNavMenu = true;
+
+    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+    private void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
+}

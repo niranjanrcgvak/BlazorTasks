@@ -1,0 +1,168 @@
+﻿@page "/todo"
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@using Task2.Web.Models
+@using Task2.Web.Services
+@inject TodoService TodoService
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<AuthorizeView>
+    <Authorized Context="authContext">
+        <EditForm Model="todoModel" OnValidSubmit="AddTodoItem">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+            <div>
+                <h3 class="mb-4">To-Do List</h3>
+                <div class="progress">
+                    <div class="progress-bar" role="progressbar" style="width: @GetProgressPercentage()%" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100">@GetProgressPercentage()%</div>
+                </div>
+                <br />
+                <div class="input-group mb-3">
+                    <InputText @bind-Value="todoModel.Description" class="form-control" placeholder="Add new to-do item"/>
+                    <div class="input-group-append">
+                        <button class="btn btn-primary" >Add</button>
+                    </div>
+                </div>
+            </div>
+        </EditForm>
+        <EditForm Model="todoEditModel" Context="edit" OnValidSubmit="EditTodoItem">
+            <div>
+                <ul class="list-group">
+                    @foreach (var item in todoItems)
+                    {
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            @if (item.IsEditing)
+                            {
+                                <InputText @bind-Value="todoEditModel.Description" class="form-control" placeholder="Item description" />
+                                <button class="btn btn-success ml-2" type="submit"><i class="fa-solid fa-floppy-disk"></i></button>
+                            }
+                            else
+                            {
+                                <div>
+                                    <input type="checkbox" @bind="item.IsCompleted" @onclick="() => ChangeStatus(item)"/>
+                                    <span style="text-decoration: @(item.IsCompleted ? "line-through" : "none")">
+                                        @item.Description
+                                    </span>
+                                </div>
+                                <div>
+                                    @if (!item.IsCompleted)
+                                    {
+                                        <button type="button" class="btn btn-sm btn-secondary ml-2" @onclick="() => EditItem(item)"><i class="fa-solid fa-pencil"></i></button>
+                                        <button type="button" class="btn btn-sm btn-danger ml-2" @onclick="() => DeleteItem(item)"><i class="fa-solid fa-trash"></i></button>
+                                    }
+                                </div>
+                            }
+                        </li>
+                    }
+                </ul>
+            </div>
+        </EditForm>
+    </Authorized>
+    <NotAuthorized>
+        <p>You are not authorized to view this page. Redirecting...</p>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    private List<TodoItem> todoItems = new List<TodoItem>();
+    private TodoModel todoModel = new TodoModel();
+    private TodoEditModel todoEditModel = new TodoEditModel();
+
+    private string newToDoDescription = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (!user.Identity.IsAuthenticated)
+        {
+            Navigation.NavigateTo("/unauthorized");
+        }
+        else
+        {
+            todoItems = await TodoService.GetTodoItems();
+        }
+    }
+
+    private async Task AddTodoItem()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (!user.Identity.IsAuthenticated)
+        {
+            Navigation.NavigateTo("/unauthorized");
+        }
+        else
+        {
+            await TodoService.AddToDoItem(todoModel.Description);
+            todoItems = await TodoService.GetTodoItems();
+            todoModel = new TodoModel();
+        }
+    }
+
+    private async Task EditTodoItem()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (!user.Identity.IsAuthenticated)
+        {
+            Navigation.NavigateTo("/unauthorized");
+        }
+        else
+        {
+            await TodoService.EditToDoItem(todoEditModel.Id, todoEditModel.Description, false);
+            todoItems = await TodoService.GetTodoItems();
+        }
+    }
+
+    private async Task DeleteItem(TodoItem item)
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (!user.Identity.IsAuthenticated)
+        {
+            Navigation.NavigateTo("/unauthorized");
+        }
+        else
+        {
+            await TodoService.DeleteToDoItem(item.Id);
+            todoItems = await TodoService.GetTodoItems();
+        }
+    }
+
+    private void EditItem(TodoItem item)
+    {
+        item.IsEditing = true;
+        todoEditModel.Id = item.Id;
+        todoEditModel.Description = item.Description;
+    }
+
+    private async Task ChangeStatus(TodoItem todoItem)
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (!user.Identity.IsAuthenticated)
+        {
+            Navigation.NavigateTo("/unauthorized");
+        }
+        else
+        {
+            await TodoService.EditToDoItem(todoItem.Id, todoItem.Description, !todoItem.IsCompleted);
+            todoItems = await TodoService.GetTodoItems();
+        }
+    }
+
+    private int GetProgressPercentage()
+    {
+        if (todoItems.Count == 0) return 0;
+        var completed = todoItems.Count(item => item.IsCompleted);
+        return (completed * 100) / todoItems.Count;
+    }
+}

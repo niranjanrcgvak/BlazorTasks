@@ -1,0 +1,70 @@
+﻿<!-- Pages/UserList.razor -->
+@page "/userlist"
+@using Microsoft.AspNetCore.Components.Authorization
+@using Task2.Web.Models
+@using Task2.Web.Services
+@inject HttpClient HttpClient
+@inject UserService UserService
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<AuthorizeView Roles="Admin">
+    <Authorized Context="authContext">
+        <div>
+            <h3 class="mb-4">User's To-Do List</h3>
+            <ul class="list-group">
+                @foreach (var user in users)
+                {
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            
+                            <span>
+                                @user.UserName
+                            </span>
+                        </div>
+                        <div>
+                            @if (user.TodoCount > 0)
+                            {
+                                <small>@user.CompletedCount out of @user.TodoCount completed</small>
+                                <div class="progress" style="height: 20px;">
+                                    <div class="progress-bar" role="progressbar" style="width: @GetProgressPercentage(user)%" aria-valuenow="@user.CompletedCount" aria-valuemin="0" aria-valuemax="@user.TodoCount">
+                                        @GetProgressPercentage(user)%
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </li>
+                }
+            </ul>
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        <p>You are not authorized to view this page. Redirecting...</p>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    private List<TodoUsers> users = new List<TodoUsers>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (!user.Identity.IsAuthenticated && !user.IsInRole("Admin"))
+        {
+            Navigation.NavigateTo("/unauthorized");
+        }
+        else
+        {
+            users = await UserService.GetUsers();
+        }
+    }
+
+    private int GetProgressPercentage(TodoUsers user)
+    {
+        if (user.TodoCount == 0) return 0;
+        var completed = user.CompletedCount;
+        return (completed * 100) / user.TodoCount;
+    }
+}

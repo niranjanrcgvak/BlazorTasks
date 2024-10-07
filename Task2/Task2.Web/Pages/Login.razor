@@ -1,0 +1,66 @@
+﻿@page "/login"
+@page "/"
+@using System.ComponentModel.DataAnnotations
+@using Task2.Web.Models
+@using Task2.Web.Services
+@using Task2.Web.Layout
+@inject AuthService AuthService
+@inject NavigationManager NavigationManager
+@layout InitialLayout
+
+<div class="container d-flex justify-content-center align-items-center" style="height: 98vh !important;">
+    <div class="card shadow-sm" style="max-width: 350px; width: 100%;">
+        <div class="card-body">
+            <h3 class="card-title text-center mb-4">Login</h3>
+
+            <EditForm Model="loginModel" OnValidSubmit="HandleValidSubmit">
+                <DataAnnotationsValidator />
+                <ValidationSummary class="text-danger" />
+
+                @if (!string.IsNullOrEmpty(errorMessage))
+                {
+                    <div class="alert alert-danger" role="alert">
+                        @errorMessage
+                    </div>
+                }
+
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email:</label>
+                    <InputText id="email" @bind-Value="loginModel.Email" class="form-control" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password:</label>
+                    <InputText id="password" @bind-Value="loginModel.Password" type="password" class="form-control" />
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100">Login</button>
+            </EditForm>
+
+            <div class="text-center mt-3">
+                <a href="/register" class="text-decoration-none">Don't have an account? Register</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private LoginModel loginModel = new LoginModel();
+    private string errorMessage;
+
+    private async Task HandleValidSubmit()
+    {
+        // Reset the error message on each submission
+        errorMessage = string.Empty;
+
+        var result = await AuthService.LoginAsync(loginModel.Email, loginModel.Password);
+        if (result)
+        {
+            NavigationManager.NavigateTo("/todo");
+        }
+        else
+        {
+            errorMessage = "Invalid email or password. Please try again.";
+        }
+    }
+}
