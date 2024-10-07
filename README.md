@@ -41,6 +41,9 @@ Before running the application, ensure that the startup project is set to multip
 
 ### 5. Run the Application
 Run the Task2.Web and Task2.Api project for the first time. Task2.Api project will seed the default Roles and Users into the database.
+Admin User Credentials
+Email - admin@gmail.com
+Password - Admin@123
 
 ### 6. Authentication
 You can use the login and register pages in the Task2.Web project for authenticating users.
