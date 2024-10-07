@@ -27,13 +27,11 @@ namespace Task2.Web.StateProvider
                 return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
             }
 
-            // Validate the token or parse claims from the token
             var claims = ParseClaimsFromJwt(token);
 
             var identity = new ClaimsIdentity(claims, "jwtAuth");
             var user = new ClaimsPrincipal(identity);
 
-            // Set token in the Authorization header for future API calls
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
             return new AuthenticationState(user);

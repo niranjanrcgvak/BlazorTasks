@@ -8,7 +8,6 @@ using Task2.Web.StateProvider;
 
 namespace Task2.Web.Services
 {
-    // Services/AuthService.cs
     public class AuthService
     {
         private readonly HttpClient _httpClient;
@@ -48,7 +47,6 @@ namespace Task2.Web.Services
             if (response.IsSuccessStatusCode)
             {
                 var result = await response.Content.ReadFromJsonAsync<AuthResponse>();
-                // Mark user as authenticated in the CustomStateProvider
                 await _customStateProvider.MarkUserAsAuthenticated(result.Token);
                 return true;
             }
@@ -64,10 +62,8 @@ namespace Task2.Web.Services
         {
             if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
             {
-                // Read the response content as a string
                 var jsonResponse = await response.Content.ReadAsStringAsync();
 
-                // Deserialize the response into a List of ErrorDetail
                 var errors = JsonSerializer.Deserialize<List<ErrorDetail>>(jsonResponse, new JsonSerializerOptions
                 {
                     PropertyNameCaseInsensitive = true
@@ -75,7 +71,7 @@ namespace Task2.Web.Services
 
                 return errors;
             }
-            return null; // Or throw an exception if it's not a bad request
+            return null;
         }
     }
 

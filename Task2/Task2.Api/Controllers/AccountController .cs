@@ -8,7 +8,6 @@ using Task2.Web.Api.Models;
 
 namespace Task2.Web.Api.Controllers
 {
-    // Controllers/AccountController.cs
     [ApiController]
     [Route("api/account")]
     public class AccountController : ControllerBase
@@ -44,7 +43,6 @@ namespace Task2.Web.Api.Controllers
             }
             var roles = await _userManager.GetRolesAsync(user);
             var token = GenerateJwtToken(user.Id, roles);
-            // Generate JWT Token here and return it
             return Ok(new { token = token });
         }
 
@@ -58,7 +56,6 @@ namespace Task2.Web.Api.Controllers
                     new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 };
 
-                // Add roles to the token claims
                 foreach (var role in roles)
                 {
                     claims.Add(new Claim(ClaimTypes.Role, role));

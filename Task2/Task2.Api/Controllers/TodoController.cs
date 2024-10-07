@@ -7,7 +7,6 @@ using Task2.Web.Api.Models;
 
 namespace Task2.Web.Api.Controllers
 {
-    // Controllers/TodoController.cs
     [Authorize]
     [ApiController]
     [Route("api/todo")]
