@@ -2,3 +2,10 @@
 /Task1/obj
 /Task1/.vs/Task1
 /Task1/bin/Debug/net8.0
+/Task2/Task2.Api/bin/Debug/net8.0
+/Task2/.vs
+/Task2/Task2.Api/obj/Debug/net8.0
+/Task2/Task2.Api/obj
+/Task2/Task2.Web/bin/Debug/net8.0
+/Task2/Task2.Web/obj/Debug/net8.0
+/Task2/Task2.Web/obj
